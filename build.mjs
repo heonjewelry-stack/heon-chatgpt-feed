@@ -120,7 +120,7 @@ const COLS = [
   'item_id', 'group_id', 'listing_has_variations', 'variant_dict', 'title', 'description', 'url', 'brand', 'seller_name',
   'seller_url', 'image_url', 'additional_image_urls', 'availability', 'price', 'sale_price', 'condition', 'product_category',
   'material', 'color', 'size', 'gender', 'age_group', 'gtin', 'review_count', 'star_rating', 'shipping_price',
-  'accepts_returns', 'return_deadline_in_days', 'return_policy', 'is_eligible_search',
+  'accepts_returns', 'return_deadline_in_days', 'return_policy', 'target_countries', 'store_country', 'is_eligible_search',
 ];
 
 function rowsFor(p) {
@@ -174,6 +174,9 @@ function rowsFor(p) {
       accepts_returns: 'true',
       return_deadline_in_days: String(RETURN_DAYS),
       return_policy: RETURN_POLICY_URL,
+      // Fiyatlar USD = ABD fiyatı. Akışa izin verilen ülkeler: US, CA, AU, GB — yalnız US (diğerleri yerel para ister)
+      target_countries: JSON.stringify(['US']),
+      store_country: 'US',
       is_eligible_search: 'true',
     };
   });
