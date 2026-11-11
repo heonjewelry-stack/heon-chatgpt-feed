@@ -1,0 +1,39 @@
+name: Shopify → ChatGPT ürün akışı
+
+on:
+  schedule:
+    - cron: '41 */3 * * *' # 3 saatte bir (UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chatgpt-feed
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Akışı üret
+        run: node build.mjs
+        env:
+          SHOPIFY_SHOP: ${{ secrets.SHOPIFY_SHOP }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+      - name: Kaydet ve yayınla
+        run: |
+          # Açık depolarda GitHub, 60 gün hareketsiz kalan zamanlanmış işleri durdurur → ayda bir kalp atışı
+          date -u +'%Y-%m' > state/heartbeat.txt
+          git config user.name "heon-feed-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs state
+          if git diff --cached --quiet; then echo "Değişiklik yok"; exit 0; fi
+          git commit -m "Ürün akışı $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push || (git pull --rebase && git push)
